@@ -1,0 +1,212 @@
+
+.renk{
+    background-color:#b0c4de;
+}
+.renk2{
+    background-color: white;
+}
+.renk3{
+    color:black;
+}
+#saatler{
+    font-size: 13px;
+}
+
+.height{
+    height: 600px;
+}
+
+p{
+    text-align: center;
+}
+
+body{
+    background-color: #f8f9fa;
+    line-height: 1.5;
+    font-family: 'Poppins', sans-serif;
+}
+.baslik{
+    /* margin-left: 25%;
+    margin-right: 25%; */
+    text-align: center;
+}
+.tel{
+    color: white;
+    text-align: left;
+}
+.metin{
+    text-align: center;
+}
+
+/* footer */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.container{
+    max-width: 1170px;
+}
+.row{
+    display: flex;
+    flex-wrap: wrap;
+}
+.ul{
+    list-style: none;
+}
+.footer{
+    background-color: black;
+    padding: 70px 0;
+}
+.footer-col{
+    width: 25%;
+    padding: 0 15px;
+}
+.footer-col h4{
+    font-size: 18px;
+    color:white;
+    text-transform: capitalize;
+    margin-left: 12px;
+    margin-bottom: 35px;
+    font-weight: 500;
+    position: relative;
+
+}
+.footer-col h4::before{
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -10px; 
+    background-color: #e91e63;
+    height: 2px;
+    box-sizing: border-box;
+    width: 50px;
+}
+
+
+.footer-col ul li:not(:last-child){
+    margin-bottom: 10px;
+}
+.footer-col ul li a{
+    font-size: 16px;
+    text-transform: capitalize;
+    color: white;
+    text-decoration: none;
+    font-weight: 300px;
+    color: #bbbb;
+    display: block;
+    transition: all 0.3s ease;
+
+}
+.footer-col ul li a:hover{
+    color: white;
+    padding-left: 10px;
+}
+.footer-col  .social-links a{
+    display: inline-block;
+    height: 40px;
+    width: 40px;
+    background-color: rgba(255, 255, 255, 0.2);
+    margin:0 10px 10px 0;
+    text-align: center;
+    line-height: 40px;
+    border-radius: 50%;
+    color: white;
+    transition: all 0.3s ease;
+}
+.footer-col  .social-links a:hover{
+    color: #24262b;
+    background-color: white;
+}
+/* responsive */
+@media(max-width:767px){
+    .footer-col{
+        width: 50%;
+        margin-bottom: 30px;
+    }
+}
+@media(max-width:574px){
+    .footer-col{
+        width: 100%;
+    }
+}
+
+/* randevu al */
+.formu-doldurun{
+    max-width: 800px;
+    margin: 50px auto;
+    position: relative;
+    box-shadow: 0 10px  30px  0px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+.formu-doldurun .title{
+    text-transform: uppercase;
+    text-align: center;
+    Letter-spacing: 3px;
+    font-size: 2.2em;
+    Line-height: 48px;
+    padding-bottom: 20px;
+    color:#b0c4de ;
+    background: linear-gradient(to right, #f4524d  0%, #b0c4de  100%);
+    background-clip:text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.contact-form  .form-field{
+    position: relative;
+    margin: 32px 0;
+}
+.contact-form  .input-text{
+    display:block;
+    width: 100%;
+    height: 45px;
+    border-width: 0  0 2px 0;
+    border-color: #b0c4de;
+    font-size: 18px;
+    Line-height: 26px;
+    font-weight: 400;
+}
+.contact-form  .input-text:focus + .label,
+.contact-form  .input-text.not-empty + .label{
+    transform: translateY(-30px);
+
+}
+
+.contact-form  .input-text:focus{
+    outline: none;
+}
+.contact-form .label{
+    position: absolute;
+    Left: 20px;
+    bottom: 11px;
+    font-size: 18px;
+    Line-height: 26px;
+    font-weight: 400;
+    color: #b0c4de;
+    cursor: text;
+    text-transform: capitalize;
+    transition: transform 0.2s ease-in-out;
+}
+.contact-form  .submit-btn{
+    display: inline-block;
+    background-image: linear-gradient(125deg,  #a72879, #b0c4de);
+    color: #fff;
+    text-transform: uppercase;
+    Letter-spacing: 2px;
+    font-size: 16px;
+    padding:8px 16px;
+    border:none;
+    width: 200px;
+    cursor: pointer;
+}
+#mesaj{
+    height: 80px;
+}
+
+/* about */
+.generic{
+    padding:100px 0;
+    background-color:black;
+    color: white;
+}

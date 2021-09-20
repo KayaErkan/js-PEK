@@ -1,0 +1,204 @@
+
+////==================================================================================
+////                                  AGGREGATION
+////==================================================================================
+// 1) Aggregation, dokumanlardaki verilerin islenmesi ve hesaplanan 
+//    sonuclarin donmesini saglayan islemlerdir. 
+//
+// 2) Aggregation islemleri, farklı dokumanlardaki degerleri gruplandirabilir.
+//
+// 3) Bu gruplanan veriler uzerinde cesitli islemlerin gereceklestirelerek tek 
+//    bir sonuc degerinin donmesi saglanabilir.
+//
+//  4) MongoDB, 3 farklı yontem ile aggregation gerceklestirmeye izin verir.
+//     A) aggregation pipeline (toplama boru hattı)
+//     B) map-reduce function (map indirgeme)
+//     C) single-purpose aggregation (tek-amaç toplama)
+//
+//  5) Aggregiation, SQL'deki Join islemlerine benzetilebilir. 
+//
+//     SQL         MONGO
+//----------------------
+//     WHERE       $match
+//     GROUP BY 	 $group
+//     HAVING	     $match
+//     SELECT	     $project
+//     ORDER BY    $sort
+//     LIMIT	     $limit
+//     SUM()	     $sum
+//     COUNT()	   $count, $sum
+//     JOIN	       $lookup
+//     MERGE 	     $merge (MongoDB 4.2 ve sonrasi)
+////aggregation (sum,avg vs) yaparken bi field (coloumn) kullanacaksak syntax ı ==> "$notlar" şeklinde==================================================================================
+
+///==================================================================================
+////                          AGGREGATION PIPELINE
+////==================================================================================
+// SYNTAX
+// 
+//   pipeline = [
+ //   { $match : { … },
+ //   { $group : { … },
+ //   { $sort : { … },
+//      ...
+//   ]
+//   db.collectionName.aggregate(pipeline, options)
+//
+//  $match() – Verileri secerken flitrelemek icin
+//  $group() - islenen verilerin grupplanmasi icin 
+//  $sort()  Sonuclarin siralanmasi icin
+
+////---------------------------------------------------------------------------------
+//// 1) "kisiler" veritabaninda "ogrenciler" collection'i tanimlayalim. 
+////---------------------------------------------------------------------------------
+
+use("kisiler");
+// db.createCollection("ogrenciler");
+
+// //---------------------------------------------------------------------------------
+// // 2) asagidaki dokumanlari collection'a kaydedelim.   
+// //---------------------------------------------------------------------------------
+// db.ogrenciler.insertMany([
+// {"isim": "Tarik", "yas":17, "sube": "A", "not":97, "dersler":["fizik", "mat"]}, 
+// {"isim": "Selim", "yas":37, "sube": "A","not":77,},
+// {"isim": "Nalan", "yas":17, "sube": "B","not":55, "dersler":["fizik", "ingilizce"]},
+// {"isim": "Burhan", "yas":21, "sube": "B","not":43, "dersler":["fizik", "mat"]},
+// {"isim": "Niyazi", "yas":40, "sube": "B","not":99, "dersler":["ingilizce"]},
+// {"isim": "Galip", "yas":37, "sube": "A","not":34, "dersler":["ingilizce"]},
+// {"isim": "Teslime", "yas":24, "sube": "A","not":88, "dersler":["mat","fizik","kimya"]}]);
+
+///---------------------------------------------------------------------------------
+//// 3) yasi 30'dan buyuk olan ogrencileri sorguyulayiniz.   
+////---------------------------------------------------------------------------------
+// db.ogrenciler.aggregate({$match:{yas : {$gt:30}}});
+
+// ////---------------------------------------------------------------------------------
+// //// 4) B subesindeki yasi 30'dan kucuk olan ogrencileri sorgulayiniz.   
+// ////---------------------------------------------------------------------------------
+ //db.ogrenciler.aggregate({$match: {sube:"B", yas: {$lt:30}}})
+
+// ////---------------------------------------------------------------------------------
+// //// 5) B-subesindeki ogrenci sayisini hesaplayan sorguyu yaziniz. NOT: SAYMAK icin 
+// ////    $match icerisinde $count metodu kullanilabilir. 
+// ////---------------------------------------------------------------------------------
+ //db.ogrenciler.aggregate( {$match: {sube:"B"}}, {$count:"B-Subesi Ogrenci Sayisi"} );
+
+// // NOT:Sadece saymak icin dogrudan db.colection.count() metoduda kullanilabilir.
+// //     Bu yonteme single-purpose aggregation metotlari denilmektir. 
+// //     Ancak bu islem aggregetion'daki gibi sorgu cevabi dondurmez. Sadece hesaplanan
+// //     sonucu dondurur.tırnak içinde yazı ("B-Subesi Ogrenci Sayisi") yazamayız
+// db.ogrenciler.count( {sube: "B"});
+
+// ////---------------------------------------------------------------------------------
+// //// 6) Tum subelerdeki toplam ogrenci sayisini hesaplayan sorguyu yaziniz.
+// ////    NOT: Gruplandirirak saymak icin $sum:1 kullanilabilir. $sum:1, eslesen
+// ////    her bir grup icin 1 sayisinin donmesini ve bunlarin toplanmasini saglar.
+// ////---------------------------------------------------------------------------------
+                            //id den sonra dersler, not vs de olabilir, şubeye göre grupla=group id
+ //db.ogrenciler.aggregate ({$group:{_id: "$sube", toplamOgrenci: {$sum: 1}}});//sum:1 mesela A daki öğrencileri 1 er 1 er sayıp toplar. burada 1 yerine $not yazarsak alttaki soru gibi not ları toplar
+
+// ////---------------------------------------------------------------------------------
+// //// 7) Tum subelerdeki toplam ogrenci sayilarini ve her subedeki maks notu hesaplayan 
+// ////    sorguyu yaziniz.
+// ////    NOT: Group isleminde degiskenlerin onune $ isareti konulmalidir.
+// ////----------------------------------------------------------------------------------
+// var pipeline ={$group:{_id:"$sube", toplamOgrenci:{$sum:1}, maksNot:{$max:"$not"}}}
+// db.ogrenciler.aggregate(pipeline);
+
+////---------------------------------------------------------------------------------
+// //// 8) yasi 30'Dan kucuk olanlarin subelere gore not ortalamalarini hesaplayan 
+// ////    sorguyu yaziniz.
+// ////---------------------------------------------------------------------------------
+
+// db.ogrenciler.aggregate([
+//   {$match:{yas :{$lt:30}}},
+//   {$group: {_id:"$sube",ortalamaNot: {$avg: "$not"}}}
+// ]);
+
+// ////---------------------------------------------------------------------------------
+// //// 9) inglizce dersini alanlarin subelere gore sayilari hesaplayan sorguyu yaziniz.
+// ////---------------------------------------------------------------------------------
+// db.ogrenciler.aggregate([
+//     {$match:{dersler: "inglizce"}},
+//     {$group:{_id:"$sube", IngAlanlarinSayisi:{$sum:1}}}
+// ]);
+
+// ////---------------------------------------------------------------------------------
+// //// 10) Fizik ve Mat dersini alanlarin subelere gore sayilari hesaplayan sorguyu yaziniz.
+// ////---------------------------------------------------------------------------------
+
+// db.ogrenciler.aggregate([
+//     {$match:{dersler: ["fizik", "mat"]}},
+//     {$group:{_id:"$sube", FizMatAlanlarinSayisi:{$sum:1}}}
+// ]);
+
+// ////---------------------------------------------------------------------------------
+// //// 11) A subesindeki ogrencileri yasa gore azalan sirada, nota gore yukselen sirada
+// ////     siralayiniz.
+// ////---------------------------------------------------------------------------------
+// db.ogrenciler.aggregate([
+//   {$match:{sube:"A"}},
+//   {$sort:{yas:-1, not:1}}
+// ]);
+
+////---------------------------------------------------------------------------------
+// //// 12) kisiler veritabanı altında hesaplar ismiyle yeni bir collection olusturunuz
+// //       ve degerleri girginiz.
+// ////---------------------------------------------------------------------------------
+// use("kisiler")
+// // db.hesaplar.insertMany(
+// // [{"isim" : "ali", "harcamalar":[-80, -40, -50, -120], "kazanc":[100, 150]},
+// // {"isim" : "Can", "harcamalar" : [-60, -30, -20], "kazanc" : [200, 50, 130] },
+// // {"isim" : "Canan", "harcamalar" : [-80, -40, -50], "kazanc" : [300, 450] },
+// // {"isim" : "Betul", "harcamalar" : [-80, -120], "kazanc" : [500, 50, 70, 10] },
+// // {"isim" : "Ahsen", "harcamalar" : [-140, -50, -120], "kazanc" : [400] },
+// // {"isim" : "Su", "harcamalar" : [-120], "kazanc" : [22, 375, 65] },
+// // {"isim" : "Pelin", "harcamalar" : [-180, -40, -70, -12], "kazanc" : [500, 650, 400]}]); 
+
+// ////---------------------------------------------------------------------------------
+// //// 13) var olan dokumanlarda her kisi icin toplam harcama, toplam kazanc ve  
+// ////     bakiye degerlerini hesaplayarak dokumana ekleyen sorguyu yaziniz.
+// ////     bakiye'ye gore siralayiniz.
+// ////     NOT: Sorguda olmayan bir fiedl icin $addFields metodu kullanilabilir.
+// ////---------------------------------------------------------------------------------
+//  pipeline1 = [
+//    {$addFields :{toplamHarcama: {$sum: "$harcamalar"}, toplamKazanc: {$sum: "$kazanc"}}} ,
+//    {$addFields:{bakiye:{$add:["$toplamHarcama" ,"$toplamKazanc"]}}},
+//    {$sort:{bakiye:-1}},
+//    {$project:{"harcamalar": 0, kazanc: 0, _id:0}}
+//  ]
+
+//  db.hesaplar.aggregate(pipeline1);
+
+// ////---------------------------------------------------------------------------------
+// //// 14) hesaplar collection'nin muhasabe adinda bir kopyasini olusturalim.
+// ////---------------------------------------------------------------------------------
+// use("kisiler")
+// // db.hesaplar.aggregate({$project:{_id:0}}, {$merge: {into:"muhasabe"}});
+
+// ////---------------------------------------------------------------------------------
+// //// 15) hesaplar collection'nindan harcamalar kismini cikararak kazanclar adinda 
+// ////     yeni bir kopyasini olusturalim.
+// // ////---------------------------------------------------------------------------------
+// // db.hesaplar.aggregate({$project: {harcamalar:0, _id:0}}, {$merge: {into:"kazanclar"}});
+
+
+// ////==================================================================================
+// ////                                  BULKWRITE
+// ////  Birden fazla islemi ayni komutla gerceklestirmek icin BulkWrite kullanilabilir.
+// //==================================================================================
+// use("kisiler");
+// // db.hikayeler.insertMany(
+// // [{"yazar" : "Mehmet Bak", "fiyat" : 60, "yayinYili" : 1998 },
+// // {"yazar" : "Ali Gel", "fiyat" : 75, "yayinYili" : 2000 },
+// // {"yazar" : "Su Ak", "fiyat" : 90, "yayinYili" : 2005 },
+// // {"yazar" : "İsmet Kaç", "fiyat" : 35, "yayinYili" : 2010 },
+// // {"yazar" : "Pelin Su", "fiyat" : 80, "yayinYili" : 2020 },
+// // {"yazar" : "Suat Ok", "fiyat" : 54, "yayinYili" : 2001}]);
+
+// db.hikayeler.bulkWrite([
+//   {insertOne:{"document": {yazar: "Selim Genc", fiyat: 77, yayinYili : 2021 }}},
+//   {updateOne:{"filter":{yazar: "Ali Gel"}, "update": {$set: {fiyat:99}}}},
+//   {replaceOne:{"filter":{yazar:"Pelin Su"}, "replacement": {yazar: "Ceylan Kaya", fiyat:55}}},
+//   {deleteOne:{"filter" : {yazar: "Suat Ok"}}}
+// ]);
